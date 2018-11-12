@@ -89,26 +89,18 @@ class Articles {
     }
 
     getArticleTemplate(article){
-        const options = {
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: false,
-        };
-
         return `
-            <div class="img-container">
-                <a class="img-wrapper" href="${article.url}">
+            <div class="article-img-container">
+                <a class="article-img-wrapper" href="${article.url}">
                     <img class="article-img" src="${article.urlToImage}" />
-                    <p class="description">${article.description}</p>
+                    <p class="article-description">${article.description}</p>
                 </a>
             </div>
             <div class="article-content-container">
                 <h3 class="article-title">
                     <a href="${article.url}">${article.title}</a>
                 </h3>
-                <p class="article-published">${article.author} - ${article.publishedAt.toLocaleString('en-US', options)}</p>
+                <p class="article-published">${article.author} - ${new Date(article.publishedAt).toLocaleString()}</p>
             </div>
         `;
     }
@@ -126,6 +118,7 @@ class Main {
         this.chanelsSelect = document.querySelector('#chanels-select');
         this.recordsSelect = document.querySelector('#records-count-select');
         this.resultConteiner = document.querySelector('#search-result');
+        this.loader = document.querySelector('#loader');
 
         const {apiKey, url} = config;
         this.api = new NewsApi(apiKey, url);
@@ -153,6 +146,9 @@ class Main {
     }
 
     search() {
+        this.loader.classList.remove('hidden');
+        this.resultConteiner.classList.add('hidden');
+
         const channel = this.channels[this.selectedChanelIndex].value;
         const recordsCount = this.recordsCount[this.selectedRecordCountIndex].value;
         this.api.getData(channel,recordsCount)
@@ -160,6 +156,8 @@ class Main {
                 const fragment = this.articles.parseDataToHtmlFragment(jsonData);
                 this.resultConteiner.innerHTML = "";
                 this.resultConteiner.appendChild(fragment);
+                this.loader.classList.add('hidden');
+                this.resultConteiner.classList.remove('hidden');
             })
             .catch(error => console.log(error.message));
     }
